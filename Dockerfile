@@ -22,9 +22,13 @@ FROM node:12-alpine as node-builder
 
 WORKDIR /build
 
+COPY package.json yarn.lock ./
+
+RUN yarn
+
 COPY . ./
 
-RUN yarn && yarn build
+RUN yarn build
 
 ############################################################
 # Step 3 Copy Files and Run Server
