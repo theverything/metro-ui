@@ -1,0 +1,25 @@
+.container {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 10px;
+}
+
+.lastUpdate {
+  margin-top: 10px;
+}
+
+h3 {
+  margin: 0;
+}
+
+.good {
+  background-color: #64e291;
+}
+
+.warning {
+  background-color: #e6e56c;
+}
+
+.danger {
+  background-color: #eb7070;
+}
