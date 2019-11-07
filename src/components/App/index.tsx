@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import qs from "qs";
 import {
   getStationScheduleList,
   metrolinkStations,
@@ -8,7 +9,13 @@ import {
 import s from "./App.module.css";
 
 const App: React.FC = () => {
-  const [station, setStation] = useState("fullerton");
+  const [station, setStation] = useState(() => {
+    const query: Record<string, string> = qs.parse(window.location.search, {
+      ignoreQueryPrefix: true
+    });
+
+    return query.s || "fullerton";
+  });
   const [list, setList] = useState<FormattedStop[]>([]);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
   useEffect(() => {
@@ -43,7 +50,9 @@ const App: React.FC = () => {
         value={station}
       >
         {Object.keys(metrolinkStations).map(s => (
-          <option value={s.toLowerCase()}>{s}</option>
+          <option key={s} value={s.toLowerCase()}>
+            {s}
+          </option>
         ))}
       </select>
       <div className={s.lastUpdate}>Last Updated {lastUpdate.toString()}</div>
@@ -60,7 +69,7 @@ const App: React.FC = () => {
         </thead>
         <tbody>
           {list.map(stop => (
-            <tr className={s[stop.status]}>
+            <tr key={stop.line + stop.designation} className={s[stop.status]}>
               <td data-label="Line">{stop.line}</td>
               <td data-label="Train Number">{stop.designation}</td>
               <td data-label="Destination">{stop.destination}</td>

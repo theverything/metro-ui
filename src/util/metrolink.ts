@@ -135,7 +135,6 @@ function processStation(station: string, stationScheduleList: ScheduledStop[]) {
   const trains: FormattedStop[] = stationScheduleList
     .filter(stop => stop.PlatformName.toLowerCase() === station.toLowerCase())
     .map(stop => {
-      console.log(stop);
       return {
         line: lineShortName[stop.RouteCode],
         designation: stop.TrainDesignation,
