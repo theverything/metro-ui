@@ -33,7 +33,7 @@ const App: React.FC = () => {
           }
         })
         .catch(err => console.error(err));
-    }, 10000);
+    }, 30000);
 
     return () => {
       clearInterval(i);
