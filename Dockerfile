@@ -38,6 +38,4 @@ FROM gcr.io/distroless/static
 COPY --from=node-builder /build/build /build
 COPY --from=go-builder /build/server /server
 
-EXPOSE 3000
-
 ENTRYPOINT [ "/server" ]

@@ -24,7 +24,6 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	port := os.Getenv("PORT")
-
 	if len(port) == 0 {
 		port = "8080"
 	}
