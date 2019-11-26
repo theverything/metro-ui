@@ -47,7 +47,7 @@ function App() {
         }
       })
       .catch(err => console.error(err));
-  }, [list, station]);
+  }, [station]);
   useEffect(() => {
     getStationScheduleList(station)
       .then(l => setList(l))
@@ -70,7 +70,10 @@ function App() {
         ))}
       </select>
       <button className={s.refresh} onClick={refresh}>
-        🔄 <TimeAgo time={lastUpdate} />
+        <span role="img" aria-label="refresh">
+          🔄
+        </span>{" "}
+        <TimeAgo time={lastUpdate} />
       </button>
 
       <table>
