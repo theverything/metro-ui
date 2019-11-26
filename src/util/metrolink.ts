@@ -23,6 +23,7 @@ interface ScheduledStop {
   CalculatedStatus: "ON TIME" | "DELAYED" | "EXTENDED DELAYED" | "CANCELLED";
   PTCStatus: string;
 }
+
 interface TrainLocation {
   delay_status: string;
   direction: string;
@@ -146,7 +147,6 @@ function formatArrivalTime(stop: ScheduledStop): [Date, number] {
 }
 
 function dmsToDD(loc: string) {
-  debugger;
   const [d, m, s] = loc.split(":");
   let deg = Number(d);
   const min = Number(m);
