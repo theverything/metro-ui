@@ -86,6 +86,7 @@ function App() {
             <th scope="col">Track Number</th>
             <th scope="col">Scheduled Arrival</th>
             <th scope="col">Minutes Late</th>
+            <th scope="col">Location</th>
           </tr>
         </thead>
         <tbody>
@@ -99,6 +100,19 @@ function App() {
                 {format(stop.scheduled, "h:mm a")}
               </td>
               <td data-label="Minutes Late">{stop.arrivalTime}</td>
+              <td data-label="Location">
+                {stop.lat !== "" ? (
+                  <a
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href={`https://www.google.com/maps/search/?api=1&query=${stop.lat},${stop.lon}`}
+                  >
+                    Click Here
+                  </a>
+                ) : (
+                  "Unknown"
+                )}
+              </td>
             </tr>
           ))}
         </tbody>

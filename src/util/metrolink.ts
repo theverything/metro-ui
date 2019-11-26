@@ -23,6 +23,17 @@ interface ScheduledStop {
   CalculatedStatus: "ON TIME" | "DELAYED" | "EXTENDED DELAYED" | "CANCELLED";
   PTCStatus: string;
 }
+interface TrainLocation {
+  delay_status: string;
+  direction: string;
+  lat: string;
+  line: string;
+  long: string;
+  ptc_status: string;
+  ptc_time: string;
+  speed: string;
+  symbol: string;
+}
 
 export interface FormattedStop {
   line: string;
@@ -32,6 +43,8 @@ export interface FormattedStop {
   arrivalTime: number;
   scheduled: Date;
   status: "good" | "warning" | "danger";
+  lat: string;
+  lon: string;
 }
 
 const trainStatus = {
@@ -132,10 +145,38 @@ function formatArrivalTime(stop: ScheduledStop): [Date, number] {
   return [scheduledDateTime, Math.max(scheduleDiff, 0)];
 }
 
-function processStation(station: string, stationScheduleList: ScheduledStop[]) {
+function dmsToDD(loc: string) {
+  debugger;
+  const [d, m, s] = loc.split(":");
+  let deg = Number(d);
+  const min = Number(m);
+  const sec = Number(s);
+
+  const sign = Math.sign(deg);
+
+  deg = Math.abs(deg);
+
+  const dd = deg + min / 60 + sec / 60 / 60;
+
+  return String(dd * sign);
+}
+
+function processStation(
+  station: string,
+  stationScheduleList: ScheduledStop[],
+  trainLocations: TrainLocation[]
+) {
+  const symbols = trainLocations.reduce<Record<string, TrainLocation>>(
+    (m, t) => {
+      m[t.symbol.toLowerCase()] = t;
+      return m;
+    },
+    {}
+  );
   const trains: FormattedStop[] = stationScheduleList
     .filter(stop => stop.PlatformName.toLowerCase() === station.toLowerCase())
     .map(stop => {
+      const loc = symbols[stop.TrainDesignation.toLowerCase()];
       const [scheduled, arrivalTime] = formatArrivalTime(stop);
       return {
         line: lineShortName[stop.RouteCode],
@@ -144,7 +185,9 @@ function processStation(station: string, stationScheduleList: ScheduledStop[]) {
         trackDesignation: stop.FormattedTrackDesignation,
         scheduled,
         arrivalTime,
-        status: trainStatus[stop.CalculatedStatus]
+        status: trainStatus[stop.CalculatedStatus],
+        lat: loc ? dmsToDD(loc.lat) : "",
+        lon: loc ? dmsToDD(loc.long) : ""
       };
     });
 
@@ -184,17 +227,25 @@ export function getStationScheduleList(station: string) {
     return Promise.resolve([]);
   }
 
-  return fetch("/CIS/LiveTrainMap/JSON/StationScheduleList.json", {
-    method: "GET"
-  })
-    .then(res => {
-      if (res.status !== 200) {
-        throw new Error(`Recieved status code ${res.status}`);
+  return Promise.all([
+    fetch("/CIS/LiveTrainMap/JSON/StationScheduleList.json", {
+      method: "GET"
+    }),
+    fetch("/CIS/LiveTrainMap/JSON/Trainlist.json", {
+      method: "GET"
+    })
+  ])
+    .then(([resSched, resList]) => {
+      if (resSched.status !== 200 || resList.status !== 200) {
+        throw new Error(`Recieved non 200 status code`);
       }
 
-      return res.json();
+      return Promise.all<ScheduledStop[], TrainLocation[]>([
+        resSched.json(),
+        resList.json()
+      ]);
     })
-    .then((json: ScheduledStop[]) => {
-      return processStation(station, json);
+    .then(([jsonSched, jsonList]) => {
+      return processStation(station, jsonSched, jsonList);
     });
 }
