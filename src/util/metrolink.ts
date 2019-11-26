@@ -30,6 +30,7 @@ export interface FormattedStop {
   destination: string;
   trackDesignation: string;
   arrivalTime: number;
+  scheduled: Date;
   status: "good" | "warning" | "danger";
 }
 
@@ -119,7 +120,7 @@ export const metrolinkStations = {
   "SAN BERNARDINO-DOWNTOWN": "San Bernardino - Downtown"
 };
 
-function formatArrivalTime(stop: ScheduledStop) {
+function formatArrivalTime(stop: ScheduledStop): [Date, number] {
   const scheduledTime = stop.FormattedTrainMovementTime;
   const scheduledDateTime = parse(scheduledTime, "h:mm a", new Date());
 
@@ -128,19 +129,21 @@ function formatArrivalTime(stop: ScheduledStop) {
 
   const scheduleDiff = differenceInMinutes(expectedDateTime, scheduledDateTime);
 
-  return scheduleDiff;
+  return [scheduledDateTime, Math.max(scheduleDiff, 0)];
 }
 
 function processStation(station: string, stationScheduleList: ScheduledStop[]) {
   const trains: FormattedStop[] = stationScheduleList
     .filter(stop => stop.PlatformName.toLowerCase() === station.toLowerCase())
     .map(stop => {
+      const [scheduled, arrivalTime] = formatArrivalTime(stop);
       return {
         line: lineShortName[stop.RouteCode],
         designation: stop.TrainDesignation,
         destination: stop.TrainDestination,
         trackDesignation: stop.FormattedTrackDesignation,
-        arrivalTime: formatArrivalTime(stop),
+        scheduled,
+        arrivalTime,
         status: trainStatus[stop.CalculatedStatus]
       };
     });
