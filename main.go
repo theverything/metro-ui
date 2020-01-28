@@ -18,6 +18,7 @@ type assestManifest struct {
 type server struct {
 	proxy       http.Handler
 	entrypoints []string
+	target      *url.URL
 }
 
 func isIndex(u *url.URL) bool {
@@ -33,6 +34,10 @@ func isIndex(u *url.URL) bool {
 
 func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if strings.HasPrefix(r.URL.Path, "/CIS") {
+		r.URL.Host = s.target.Host
+		r.URL.Scheme = s.target.Scheme
+		r.Host = s.target.Host
+
 		s.proxy.ServeHTTP(w, r)
 		return
 	}
@@ -76,6 +81,7 @@ func main() {
 	s := &server{
 		proxy:       httputil.NewSingleHostReverseProxy(url),
 		entrypoints: data.Entrypoints,
+		target:      url,
 	}
 
 	log.Printf("Starting server on port %v\n", port)
