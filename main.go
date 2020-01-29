@@ -37,6 +37,10 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		r.URL.Host = s.target.Host
 		r.URL.Scheme = s.target.Scheme
 		r.Host = s.target.Host
+		r.Header.Set("Referer", "http://localhost:3000/")
+		r.Header.Set("Accept", "application/json")
+		r.Header.Set("Cookie", "")
+		r.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36")
 
 		s.proxy.ServeHTTP(w, r)
 		return
